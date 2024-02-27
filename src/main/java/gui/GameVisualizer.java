@@ -222,27 +222,39 @@ public class GameVisualizer extends JPanel
      * @param angularVelocity Угловая скорость.
      * @param duration Продолжительность перемещения.
      */
-    private void moveRobot(double velocity, double angularVelocity, double duration)
-    {
+    private void moveRobot(double velocity, double angularVelocity, double duration) {
         velocity = applyLimits(velocity, 0, maxVelocity);
         angularVelocity = applyLimits(angularVelocity, -maxAngularVelocity, maxAngularVelocity);
-        double newX = m_robotPositionX + velocity / angularVelocity * 
-            (Math.sin(m_robotDirection  + angularVelocity * duration) -
-                Math.sin(m_robotDirection));
-        if (!Double.isFinite(newX))
-        {
+
+        double newX;
+        double newY;
+
+        if (Math.abs(angularVelocity) > 0) {
+
+            newX = m_robotPositionX + velocity / angularVelocity *
+                    (Math.sin(m_robotDirection + angularVelocity * duration) -
+                            Math.sin(m_robotDirection));
+            newY = m_robotPositionY - velocity / angularVelocity *
+                    (Math.cos(m_robotDirection + angularVelocity * duration) -
+                            Math.cos(m_robotDirection));
+        } else {
+
             newX = m_robotPositionX + velocity * duration * Math.cos(m_robotDirection);
-        }
-        double newY = m_robotPositionY - velocity / angularVelocity * 
-            (Math.cos(m_robotDirection  + angularVelocity * duration) -
-                Math.cos(m_robotDirection));
-        if (!Double.isFinite(newY))
-        {
             newY = m_robotPositionY + velocity * duration * Math.sin(m_robotDirection);
         }
+
+
+        if (!Double.isFinite(newX) || !Double.isFinite(newY)) {
+            newX = m_robotPositionX;
+            newY = m_robotPositionY;
+        }
+
+
         m_robotPositionX = newX;
         m_robotPositionY = newY;
-        double newDirection = asNormalizedRadians(m_robotDirection + angularVelocity * duration); 
+
+
+        double newDirection = asNormalizedRadians(m_robotDirection + angularVelocity * duration);
         m_robotDirection = newDirection;
     }
 

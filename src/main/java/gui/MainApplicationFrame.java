@@ -16,6 +16,7 @@ import log.Logger;
  */
 public class MainApplicationFrame extends JFrame  implements Serializable {
 
+    private boolean shouldExit = false; // Флаг для указания, что приложение должно завершить работу
 
     /**
      * Рабочая область для внутренних окон
@@ -46,9 +47,9 @@ public class MainApplicationFrame extends JFrame  implements Serializable {
         addWindow(gameWindow);
 
         setJMenuBar(generateMenuBar());
-        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE); // Не закрывать приложение, нажимая на "крестик"
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
-        addWindowListener(new ConfirmExitWindowListener()); //обработчик событий закрытия окна
+        addWindowListener(new ConfirmExitWindowListener());
     }
 
 
@@ -184,7 +185,10 @@ public class MainApplicationFrame extends JFrame  implements Serializable {
 
         JMenuItem exitMenuItem = new JMenuItem("Выход");
         exitMenuItem.setMnemonic(KeyEvent.VK_X);
-        exitMenuItem.addActionListener(e -> exitApplication());
+        exitMenuItem.addActionListener((event) -> {
+            WindowEvent closeEvent = new WindowEvent(this, WindowEvent.WINDOW_CLOSING);
+            Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(closeEvent);
+        });
         fileMenu.add(exitMenuItem);
 
         menuBar.add(fileMenu);
@@ -195,18 +199,21 @@ public class MainApplicationFrame extends JFrame  implements Serializable {
      * Завершает работу приложения после подтверждения выхода.
      */
     private void exitApplication() {
-        Locale.setDefault(new Locale("ru"));
-
         int confirmed = JOptionPane.showConfirmDialog(this,
                 "Вы действительно хотите выйти из приложения?", "Подтверждение выхода",
                 JOptionPane.YES_NO_OPTION);
 
         if (confirmed == JOptionPane.YES_OPTION) {
+            // Закрываем все внутренние окна
+            JInternalFrame[] frames = desktopPane.getAllFrames();
+            for (JInternalFrame frame : frames) {
+                frame.dispose();
+            }
+            setVisible(false);
             dispose();
-            System.exit(0);
+            setDefaultCloseOperation(EXIT_ON_CLOSE);
         }
     }
-
 
     /**
      * Внутренний класс, обрабатывающий событие закрытия окна приложения.
@@ -218,6 +225,5 @@ public class MainApplicationFrame extends JFrame  implements Serializable {
         }
     }
 }
-
 
 
