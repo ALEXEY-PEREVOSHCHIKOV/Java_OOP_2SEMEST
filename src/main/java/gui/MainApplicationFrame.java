@@ -6,7 +6,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.Serializable;
-import java.util.Locale;
 
 import javax.swing.*;
 import log.Logger;
@@ -15,8 +14,6 @@ import log.Logger;
  * Главное окно приложения, наследующее JFrame и реализующее интерфейс Serializable.
  */
 public class MainApplicationFrame extends JFrame  implements Serializable {
-
-    private boolean shouldExit = false; // Флаг для указания, что приложение должно завершить работу
 
     /**
      * Рабочая область для внутренних окон
@@ -86,7 +83,7 @@ public class MainApplicationFrame extends JFrame  implements Serializable {
         JMenuBar menuBar = new JMenuBar();
         addLookAndFeelMenu(menuBar);
         addTestMenu(menuBar);
-        addSettingsMenu(menuBar); // меню "Настройки"
+        addSettingsMenu(menuBar);
         return menuBar;
     }
 
@@ -204,13 +201,10 @@ public class MainApplicationFrame extends JFrame  implements Serializable {
                 JOptionPane.YES_NO_OPTION);
 
         if (confirmed == JOptionPane.YES_OPTION) {
-            // Закрываем все внутренние окна
             JInternalFrame[] frames = desktopPane.getAllFrames();
             for (JInternalFrame frame : frames) {
                 frame.dispose();
             }
-            setVisible(false);
-            dispose();
             setDefaultCloseOperation(EXIT_ON_CLOSE);
         }
     }
