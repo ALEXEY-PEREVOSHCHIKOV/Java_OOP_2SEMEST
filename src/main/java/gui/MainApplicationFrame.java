@@ -27,8 +27,7 @@ public class MainApplicationFrame extends JFrame  implements Serializable {
      */
     private static final long serialVersionUID = 1L;
 
-
-
+    //экземпляр класса LogWindow
     private final LogWindow logWindow;
 
 
