@@ -5,7 +5,8 @@ import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.Serializable;
+
+import java.io.*;
 
 import javax.swing.*;
 import log.Logger;
@@ -26,6 +27,9 @@ public class MainApplicationFrame extends JFrame  implements Serializable {
      */
     private static final long serialVersionUID = 1L;
 
+    //экземпляр класса LogWindow
+    private final LogWindow logWindow;
+
 
     /**
      * Новый экземпляр главного окна приложения.
@@ -36,7 +40,7 @@ public class MainApplicationFrame extends JFrame  implements Serializable {
         setBounds(inset, inset, screenSize.width - inset * 2, screenSize.height - inset * 2);
         setContentPane(desktopPane);
 
-        LogWindow logWindow = createLogWindow();
+        logWindow = createLogWindow();
         addWindow(logWindow);
 
         GameWindow gameWindow = new GameWindow();
@@ -47,6 +51,9 @@ public class MainApplicationFrame extends JFrame  implements Serializable {
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
         addWindowListener(new ConfirmExitWindowListener());
+
+
+        loadConfig(new AppConfig());
     }
 
 
@@ -201,10 +208,8 @@ public class MainApplicationFrame extends JFrame  implements Serializable {
                 JOptionPane.YES_NO_OPTION);
 
         if (confirmed == JOptionPane.YES_OPTION) {
-            JInternalFrame[] frames = desktopPane.getAllFrames();
-            for (JInternalFrame frame : frames) {
-                frame.dispose();
-            }
+            saveConfig(new AppConfig());
+            dispose();
             setDefaultCloseOperation(EXIT_ON_CLOSE);
         }
     }
@@ -218,6 +223,36 @@ public class MainApplicationFrame extends JFrame  implements Serializable {
             exitApplication();
         }
     }
+
+
+    private void saveConfig(AppConfig config) {
+        JInternalFrame[] frames = desktopPane.getAllFrames();
+        for (JInternalFrame frame : frames) {
+            config.saveWindowPosition(frame.getClass().getSimpleName(), frame.getX(), frame.getY());
+            config.saveWindowState(frame.getClass().getSimpleName(), frame.isMaximum());
+        }
+    }
+
+    private void loadConfig(AppConfig config) {
+        JInternalFrame[] frames = desktopPane.getAllFrames();
+        for (JInternalFrame frame : frames) {
+            int x = config.getWindowX(frame.getClass().getSimpleName());
+            int y = config.getWindowY(frame.getClass().getSimpleName());
+            frame.setLocation(x, y);
+            boolean isMaximized = config.getWindowState(frame.getClass().getSimpleName());
+            if (isMaximized) {
+                try {
+                    frame.setMaximum(true);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+
+
+
 }
 
 
