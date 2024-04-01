@@ -1,52 +1,52 @@
 package gui;
 
-import java.awt.BorderLayout;
-import java.awt.EventQueue;
-import java.awt.TextArea;
-
-import javax.swing.JInternalFrame;
-import javax.swing.JPanel;
-
 import log.LogChangeListener;
 import log.LogEntry;
 import log.LogWindowSource;
 
+import java.awt.*;
+import javax.swing.*;
+
 
 /**
- * Внутреннее окно для отображения протокола работы.
- * Реализует интерфейс LogChangeListener для обновления содержимого протокола при изменении.
+ * Класс LogWindow представляет окно с протоколом работы приложения.
  */
-public class LogWindow extends JInternalFrame implements LogChangeListener
-{
-
-    /**
-     * Источник протокола работы, из которого получается информация для отображения в окне.
-     */
-    private LogWindowSource m_logSource;
+public class LogWindow extends JInternalFrame implements LogChangeListener, Stateful {
 
 
     /**
-     * Область текста, предназначенная для отображения содержимого протокола работы.
+     * Идентификатор окна для сохранения состояния
      */
-    private TextArea m_logContent;
+    private final String WINDOW_ID = "LogWindow";
+
+
+    /**
+     * источник протокола работы
+     */
+    private final LogWindowSource logSource;
+
+
+    /**
+     *  компонент TextArea для отображения содержимого протокола.
+     */
+    private final TextArea logContent;
 
 
     /**
      * Конструктор класса LogWindow.
-     * Создает новое внутреннее окно для отображения протокола работы.
      *
-     * @param logSource Источник протокола работы.
+     * @param logSource источник протокола работы
      */
-    public LogWindow(LogWindowSource logSource) 
-    {
+    public LogWindow(LogWindowSource logSource) {
         super("Протокол работы", true, true, true, true);
-        m_logSource = logSource;
-        m_logSource.registerListener(this);
-        m_logContent = new TextArea("");
-        m_logContent.setSize(200, 500);
-        
+        this.logSource = logSource;
+        this.logSource.registerListener(this);
+
+        logContent = new TextArea("");
+        logContent.setSize(200, 500);
+
         JPanel panel = new JPanel(new BorderLayout());
-        panel.add(m_logContent, BorderLayout.CENTER);
+        panel.add(logContent, BorderLayout.CENTER);
         getContentPane().add(panel);
         pack();
         updateLogContent();
@@ -54,31 +54,49 @@ public class LogWindow extends JInternalFrame implements LogChangeListener
 
 
     /**
-     * Обновляет содержимое протокола работы на основе записей из источника протокола.
+     * Обновляет содержимое протокола работы в окне
      */
-    private void updateLogContent()
-    {
+    private void updateLogContent() {
         StringBuilder content = new StringBuilder();
-        for (LogEntry entry : m_logSource.all())
-        {
+        for (LogEntry entry : logSource.all()) {
             content.append(entry.getMessage()).append("\n");
         }
-        m_logContent.setText(content.toString());
-        m_logContent.invalidate();
+        logContent.setText(content.toString());
+        logContent.invalidate();
     }
 
 
     /**
-     * Метод обратного вызова, вызываемый при изменении протокола работы.
-     * Обновляет содержимое протокола в графическом интерфейсе.
+     * метод интерфейса LogChangeListener, вызывается при изменении протокола работы
      */
-
     @Override
-    public void onLogChanged()
-    {
+    public void onLogChanged() {
         EventQueue.invokeLater(this::updateLogContent);
     }
 
 
-}
+    /**
+     * метод интерфейса Stateful, сохраняет состояние окна
+     */
+    @Override
+    public void saveState() {
+        AppConfig.getInstance().saveWindowState(WINDOW_ID, new WindowState(getX(), getY(), getWidth(), getHeight(), isIcon()));
+    }
 
+
+    /**
+     * метод интерфейса Stateful, восстанавливает состояние окна из сохраненных данных
+     */
+    @Override
+    public void restoreState() {
+        WindowState state = AppConfig.getInstance().getWindowState(WINDOW_ID);
+        if (state != null) {
+            setBounds(state.getX(), state.getY(), state.getWidth(), state.getHeight());
+            try {
+                setIcon(state.isIconified());
+            } catch (java.beans.PropertyVetoException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}

@@ -1,20 +1,17 @@
 package gui;
 
-import java.awt.Dimension;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-
-import java.io.*;
-
 import javax.swing.*;
 import log.Logger;
 
+
 /**
- * Главное окно приложения, наследующее JFrame и реализующее интерфейс Serializable.
+ * Главное окно приложения, наследующее JFrame и реализующее интерфейс Stateful.
  */
-public class MainApplicationFrame extends JFrame  implements Serializable {
+public class MainApplicationFrame extends JFrame  implements Stateful {
 
     /**
      * Рабочая область для внутренних окон
@@ -27,34 +24,52 @@ public class MainApplicationFrame extends JFrame  implements Serializable {
      */
     private static final long serialVersionUID = 1L;
 
-    //экземпляр класса LogWindow
+
+    /**
+     * экземпляр окна протокол работы.
+     */
     private final LogWindow logWindow;
 
 
     /**
-     * Новый экземпляр главного окна приложения.
+     *  экземпляр главного окна приложения.
      */
-    public MainApplicationFrame() {
-        int inset = 50;
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds(inset, inset, screenSize.width - inset * 2, screenSize.height - inset * 2);
-        setContentPane(desktopPane);
+    private final GameWindow gameWindow;
 
-        logWindow = createLogWindow();
-        addWindow(logWindow);
+    /**
+     * Константа, содержащая идентификатор окна для сохранения состояния протокола работы.
+     */
+    private final String LOG_WINDOW_ID = "LogWindow";
 
-        GameWindow gameWindow = new GameWindow();
-        gameWindow.setSize(400, 400);
-        addWindow(gameWindow);
-
-        setJMenuBar(generateMenuBar());
-        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-
-        addWindowListener(new ConfirmExitWindowListener());
+    /**
+     * Константа, содержащая идентификатор окна для сохранения состояния игрового окна.
+     */
+    private final String GAME_WINDOW_ID = "GameWindow";
 
 
-        loadConfig(new AppConfig());
-    }
+    /**
+     * Конструктор MainApplicationFrame
+     */
+        public MainApplicationFrame() {
+            int inset = 50;
+            Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+            setBounds(inset, inset, screenSize.width - inset * 2, screenSize.height - inset * 2);
+            setContentPane(desktopPane);
+
+            logWindow = createLogWindow();
+            addWindow(logWindow);
+
+            gameWindow = new GameWindow();
+            gameWindow.setSize(400, 400);
+            addWindow(gameWindow);
+
+            setJMenuBar(generateMenuBar());
+            setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+
+            addWindowListener(new ConfirmExitWindowListener());
+
+            restoreState(); //загрузка состояния окон
+        }
 
 
     /**
@@ -208,7 +223,7 @@ public class MainApplicationFrame extends JFrame  implements Serializable {
                 JOptionPane.YES_NO_OPTION);
 
         if (confirmed == JOptionPane.YES_OPTION) {
-            saveConfig(new AppConfig());
+            saveState(); //сохранение состояния окон
             dispose();
             setDefaultCloseOperation(EXIT_ON_CLOSE);
         }
@@ -225,34 +240,43 @@ public class MainApplicationFrame extends JFrame  implements Serializable {
     }
 
 
-    private void saveConfig(AppConfig config) {
-        JInternalFrame[] frames = desktopPane.getAllFrames();
-        for (JInternalFrame frame : frames) {
-            config.saveWindowPosition(frame.getClass().getSimpleName(), frame.getX(), frame.getY());
-            config.saveWindowState(frame.getClass().getSimpleName(), frame.isMaximum());
+    /**
+     * Сохраняет состояние окон в конфигурационный файл.
+     */
+    @Override
+    public void saveState() {
+        AppConfig appConfig = AppConfig.getInstance();
+        for (JInternalFrame frame : desktopPane.getAllFrames()) {
+            if (frame instanceof Stateful) {
+                String windowId = frame instanceof LogWindow ? LOG_WINDOW_ID : GAME_WINDOW_ID;
+                appConfig.saveWindowState(windowId, new WindowState(frame.getX(), frame.getY(), frame.getWidth(), frame.getHeight(), frame.isIcon()));
+            }
         }
+        appConfig.saveConfig();
     }
 
-    private void loadConfig(AppConfig config) {
-        JInternalFrame[] frames = desktopPane.getAllFrames();
-        for (JInternalFrame frame : frames) {
-            int x = config.getWindowX(frame.getClass().getSimpleName());
-            int y = config.getWindowY(frame.getClass().getSimpleName());
-            frame.setLocation(x, y);
-            boolean isMaximized = config.getWindowState(frame.getClass().getSimpleName());
-            if (isMaximized) {
-                try {
-                    frame.setMaximum(true);
-                } catch (Exception e) {
-                    e.printStackTrace();
+
+    /**
+     * Восстанавливает состояние окон из конфигурационного файла.
+     */
+    @Override
+    public void restoreState() {
+        AppConfig appConfig = AppConfig.getInstance();
+        appConfig.loadConfig();
+        for (JInternalFrame frame : desktopPane.getAllFrames()) {
+            if (frame instanceof Stateful) {
+                String windowId = frame instanceof LogWindow ? LOG_WINDOW_ID : GAME_WINDOW_ID;
+                WindowState state = appConfig.getWindowState(windowId);
+                if (state != null) {
+                    frame.setBounds(state.getX(), state.getY(), state.getWidth(), state.getHeight());
+                    try {
+                        frame.setIcon(state.isIconified());
+                    } catch (java.beans.PropertyVetoException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
     }
-
-
-
-
 }
-
 
