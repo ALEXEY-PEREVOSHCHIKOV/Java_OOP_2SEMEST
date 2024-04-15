@@ -57,7 +57,7 @@ public class AppConfig {
      *  @param state    состояние окна для сохранения
      */
     public void saveWindowState(String windowId, WindowState state) {
-        windowStates.put(windowId, state);
+        windowStates.put(windowId, state); // Добавляем состояние окна в карту
         saveConfig();
     }
 
@@ -69,7 +69,7 @@ public class AppConfig {
      *   @return состояние окна
      */
     public WindowState getWindowState(String windowId) {
-        return windowStates.get(windowId);
+        return windowStates.get(windowId); // Возвращаем состояние окна по его идентификатору
     }
 
 
@@ -77,10 +77,10 @@ public class AppConfig {
      * Сохраняет конфигурацию в файл
      */
     public void saveConfig() {
-        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(CONFIG_FILE_PATH))) {
-            out.writeObject(windowStates);
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(CONFIG_FILE_PATH))) { //Создается новый ObjectOutputStream с потоком вывода FileOutputStream, который записывает данные в файл CONFIG_FILE_PATH.
+            out.writeObject(windowStates); // Записываем состояния окон в файл
         } catch (IOException e) {
-            e.printStackTrace();
+            e.printStackTrace();  // В случае ошибки выводим сообщение об ошибке
         }
     }
 
@@ -89,8 +89,8 @@ public class AppConfig {
      * Загружает конфигурацию из файла
      */
     public void loadConfig() {
-        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(CONFIG_FILE_PATH))) {
-            windowStates = (Map<String, WindowState>) in.readObject();
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(CONFIG_FILE_PATH))) { //Создается новый ObjectInputStream с потоком ввода FileInputStream, который считывает данные из файла CONFIG_FILE_PATH.
+            windowStates = (Map<String, WindowState>) in.readObject(); // Читаем состояния окон из файла
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }

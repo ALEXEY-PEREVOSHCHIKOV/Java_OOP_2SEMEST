@@ -89,12 +89,16 @@ public class LogWindow extends JInternalFrame implements LogChangeListener, Stat
      */
     @Override
     public void restoreState() {
+        // Получаем сохраненное состояние окна из AppConfig по его идентификатору
         WindowState state = AppConfig.getInstance().getWindowState(WINDOW_ID);
+        // Если состояние найдено, восстанавливаем позицию и размеры окна
         if (state != null) {
             setBounds(state.getX(), state.getY(), state.getWidth(), state.getHeight());
             try {
+                // Если окно было свернуто, восстанавливаем его свернутое состояние
                 setIcon(state.isIconified());
             } catch (java.beans.PropertyVetoException e) {
+                // Обработка исключения при установке свернутого состояния
                 e.printStackTrace();
             }
         }

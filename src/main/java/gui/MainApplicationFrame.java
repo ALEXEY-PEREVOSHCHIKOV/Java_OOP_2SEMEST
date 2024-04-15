@@ -1,38 +1,35 @@
 package gui;
 
+import log.Logger;
+
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import javax.swing.*;
-import log.Logger;
-
 
 /**
  * Главное окно приложения, наследующее JFrame и реализующее интерфейс Stateful.
  */
-public class MainApplicationFrame extends JFrame  implements Stateful {
+public class MainApplicationFrame extends JFrame implements Stateful {
 
     /**
      * Рабочая область для внутренних окон
      */
     private final JDesktopPane desktopPane = new JDesktopPane();
 
-
     /**
      * Номер версии класса для сохранения состояния
      */
     private static final long serialVersionUID = 1L;
 
-
     /**
-     * экземпляр окна протокол работы.
+     * экземпляр окна протокола работы.
      */
     private final LogWindow logWindow;
 
-
     /**
-     *  экземпляр главного окна приложения.
+     * экземпляр главного окна приложения.
      */
     private final GameWindow gameWindow;
 
@@ -46,34 +43,47 @@ public class MainApplicationFrame extends JFrame  implements Stateful {
      */
     private final String GAME_WINDOW_ID = "GameWindow";
 
+    /**
+     * Константа, содержащая идентификатор окна для сохранения состояния окна c координатами робота.
+     */
+    private final String ROBOT_COORDINATES_WINDOW_ID = "RobotCoordinatesWindow";
+
 
     /**
      * Конструктор MainApplicationFrame
      */
-        public MainApplicationFrame() {
-            int inset = 50;
-            Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-            setBounds(inset, inset, screenSize.width - inset * 2, screenSize.height - inset * 2);
-            setContentPane(desktopPane);
+    public MainApplicationFrame() {
+        int inset = 50;
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        setBounds(inset, inset, screenSize.width - inset * 2, screenSize.height - inset * 2);
+        setContentPane(desktopPane);
 
-            logWindow = createLogWindow();
-            addWindow(logWindow);
+        logWindow = createLogWindow();
+        addWindow(logWindow);
 
-            gameWindow = new GameWindow();
-            gameWindow.setSize(400, 400);
-            addWindow(gameWindow);
 
-            setJMenuBar(generateMenuBar());
-            setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        RobotModel robotModel = new RobotModel();
 
-            addWindowListener(new ConfirmExitWindowListener());
 
-            restoreState(); //загрузка состояния окон
-        }
+        gameWindow = new GameWindow(robotModel);
+        gameWindow.setSize(400, 400);
+        addWindow(gameWindow);
 
+
+        RobotCoordinatesWindow robotCoordinatesWindow = createRobotLocationWindow(robotModel);
+        addWindow(robotCoordinatesWindow);
+
+        setJMenuBar(generateMenuBar());
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+
+        addWindowListener(new ConfirmExitWindowListener());
+
+        restoreState(); // загрузка состояния окон
+    }
 
     /**
      * Создает и возвращает окно журнала.
+     *
      * @return Окно журнала.
      */
     protected LogWindow createLogWindow() {
@@ -87,8 +97,16 @@ public class MainApplicationFrame extends JFrame  implements Stateful {
     }
 
 
+    private RobotCoordinatesWindow createRobotLocationWindow(RobotModel robotModel) {
+        RobotCoordinatesWindow robotLocationWindow = new RobotCoordinatesWindow(robotModel);
+        robotLocationWindow.setLocation(800, 0);
+        robotLocationWindow.setSize(200, 100);
+        return robotLocationWindow;
+    }
+
     /**
      * Добавляет внутреннее окно на рабочую область.
+     *
      * @param frame Внутреннее окно для добавления.
      */
     protected void addWindow(JInternalFrame frame) {
@@ -96,9 +114,9 @@ public class MainApplicationFrame extends JFrame  implements Stateful {
         frame.setVisible(true);
     }
 
-
     /**
      * Генерирует и возвращает меню приложения.
+     *
      * @return Меню приложения.
      */
     private JMenuBar generateMenuBar() {
@@ -245,13 +263,19 @@ public class MainApplicationFrame extends JFrame  implements Stateful {
      */
     @Override
     public void saveState() {
+        // Получаем единственный экземпляр AppConfig
         AppConfig appConfig = AppConfig.getInstance();
+        // Проходим по всем окнам на рабочей области
         for (JInternalFrame frame : desktopPane.getAllFrames()) {
+            // Проверяем, является ли окно экземпляром класса, реализующего интерфейс Stateful
             if (frame instanceof Stateful) {
-                String windowId = frame instanceof LogWindow ? LOG_WINDOW_ID : GAME_WINDOW_ID;
+                // Определяем уникальный идентификатор окна
+                String windowId = frame instanceof LogWindow ? LOG_WINDOW_ID : (frame instanceof RobotCoordinatesWindow ? ROBOT_COORDINATES_WINDOW_ID : GAME_WINDOW_ID);
+                // Сохраняем состояние окна с помощью AppConfig
                 appConfig.saveWindowState(windowId, new WindowState(frame.getX(), frame.getY(), frame.getWidth(), frame.getHeight(), frame.isIcon()));
             }
         }
+        // Сохраняем все данные в конфигурационный файл
         appConfig.saveConfig();
     }
 
@@ -262,11 +286,17 @@ public class MainApplicationFrame extends JFrame  implements Stateful {
     @Override
     public void restoreState() {
         AppConfig appConfig = AppConfig.getInstance();
+        // Загружаем конфигурацию из файла
         appConfig.loadConfig();
+        // Проходим по всем окнам на рабочей области
         for (JInternalFrame frame : desktopPane.getAllFrames()) {
+            // Проверяем, является ли окно экземпляром класса, реализующего интерфейс Stateful
             if (frame instanceof Stateful) {
-                String windowId = frame instanceof LogWindow ? LOG_WINDOW_ID : GAME_WINDOW_ID;
+                // Определяем уникальный идентификатор окна
+                String windowId = frame instanceof LogWindow ? LOG_WINDOW_ID : (frame instanceof RobotCoordinatesWindow ? ROBOT_COORDINATES_WINDOW_ID : GAME_WINDOW_ID);
+                // Получаем сохраненное состояние окна из AppConfig
                 WindowState state = appConfig.getWindowState(windowId);
+                // Если состояние найдено, устанавливаем соответствующие размеры, положение и проверяем, было ли окно свернуто
                 if (state != null) {
                     frame.setBounds(state.getX(), state.getY(), state.getWidth(), state.getHeight());
                     try {

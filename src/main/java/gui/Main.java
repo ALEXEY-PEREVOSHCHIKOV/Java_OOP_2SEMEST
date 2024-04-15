@@ -31,7 +31,6 @@ public class Main
       e.printStackTrace();
     }
 
-    // основной фрейм приложения
     SwingUtilities.invokeLater(() -> {
       MainApplicationFrame frame = new MainApplicationFrame();
       frame.pack();
