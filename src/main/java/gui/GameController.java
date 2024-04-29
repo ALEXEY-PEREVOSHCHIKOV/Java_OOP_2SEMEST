@@ -3,14 +3,14 @@ package gui;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Контроллер для управления роботом в игре.
  */
 public class GameController extends MouseAdapter {
     private RobotModel robotModel;
-    private final Timer timer;
-
+    private Timer timer;
 
     /**
      * Конструктор класса GameController.
@@ -21,9 +21,7 @@ public class GameController extends MouseAdapter {
     public GameController(RobotModel robotModel, GameVisualizer gameVisualizer) {
         this.robotModel = robotModel;
         gameVisualizer.addMouseListener(this);
-        this.timer = new Timer(true);
     }
-
 
     /**
      * Обработчик события клика мыши.
@@ -35,5 +33,22 @@ public class GameController extends MouseAdapter {
         int x = e.getX();
         int y = e.getY();
         robotModel.moveRobotTo(x, y);
+        startTimer();
+    }
+
+    /**
+     * Запускает таймер для обновления модели робота.
+     */
+    private void startTimer() {
+        if (timer != null) {
+            timer.cancel();
+        }
+        timer = new Timer("RobotMovementTimer", true);
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                robotModel.updateModel();
+            }
+        }, 0, 10);
     }
 }

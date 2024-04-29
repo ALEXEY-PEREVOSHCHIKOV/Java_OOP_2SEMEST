@@ -24,15 +24,13 @@ public class GameVisualizer extends JPanel implements RobotModelListener {
         setDoubleBuffered(true);
         setFocusable(true);
 
-        Timer timer = new Timer(1, e -> {
-            repaint();
-        });
-        timer.start();
-
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 clickPoint = e.getPoint();
+                int x = clickPoint.x;
+                int y = clickPoint.y;
+                robotModel.moveRobotTo(x, y); // Перемещаем робота в точку клика мышью
             }
         });
 
@@ -71,7 +69,6 @@ public class GameVisualizer extends JPanel implements RobotModelListener {
         drawOval(g2d, robotCenterX + 10, robotCenterY, 5, 5);
     }
 
-
     /**
      * Заполняет овал указанным цветом.
      *
@@ -84,7 +81,6 @@ public class GameVisualizer extends JPanel implements RobotModelListener {
     private void fillOval(Graphics2D g, int centerX, int centerY, int diam1, int diam2) {
         g.fillOval(centerX - diam1 / 2, centerY - diam2 / 2, diam1, diam2);
     }
-
 
     /**
      * Рисует овал указанным цветом.
@@ -99,7 +95,6 @@ public class GameVisualizer extends JPanel implements RobotModelListener {
         g.drawOval(centerX - diam1 / 2, centerY - diam2 / 2, diam1, diam2);
     }
 
-
     /**
      * Обновляет координаты робота при изменении их моделью.
      *
@@ -108,5 +103,7 @@ public class GameVisualizer extends JPanel implements RobotModelListener {
      * @param direction Направление робота.
      */
     @Override
-    public void onRobotPositionChanged(double x, double y, double direction) {}
+    public void onRobotPositionChanged(double x, double y, double direction) {
+        repaint(); // Перерисовываем панель при изменении позиции робота
+    }
 }
