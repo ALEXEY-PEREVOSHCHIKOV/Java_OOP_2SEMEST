@@ -33,15 +33,6 @@ public final class Logger
     }
 
 
-    /**
-     * Записывает сообщение об ошибке в лог.
-     * @param strMessage Сообщение об ошибке для записи в лог.
-     */
-    public static void error(String strMessage)
-    {
-        defaultLogSource.append(LogLevel.Error, strMessage);
-    }
-
 
     /**
      * Возвращает лог-источник по умолчанию.

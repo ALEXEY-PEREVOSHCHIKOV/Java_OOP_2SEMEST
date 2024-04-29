@@ -40,20 +40,6 @@ public class LogWindowSource {
 
 
     /**
-     * Получает диапазон записей лога, начиная с указанной точки времени.
-     * @param startFrom Время старта диапазона в миллисекундах (от текущего момента).
-     * @param count Количество записей для извлечения.
-     * @return Итерируемый объект записей в заданном диапазоне.
-     */
-    public Iterable <LogEntry> range(int startFrom, int count) {
-        long currentTime = System.currentTimeMillis();
-        long windowStart = currentTime - startFrom;
-        long windowEnd = windowStart + count;
-        return temporalLogWindow.range(windowStart, windowEnd);
-    }
-
-
-    /**
      * Возвращает количество записей в логе.
      * @return Общее число записей логов.
      */

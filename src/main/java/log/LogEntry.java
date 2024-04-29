@@ -33,15 +33,5 @@ public class LogEntry
         return m_strMessage;
     }
 
-
-    /**
-     * Возвращает уровень этой записи протокола.
-     *
-     * @return Уровень протоколирования.
-     */
-    public LogLevel getLevel()
-    {
-        return m_logLevel;
-    }
 }
 
