@@ -44,6 +44,7 @@ public class TemporalLogStructure implements Iterable <LogEntry> {
         List  <LogEntry> currentWindow = temporalWindows.computeIfAbsent(windowStart, k -> new ArrayList<>());
         currentWindow.add(logEntry);
         cleanUpExpiredWindows(currentTime);
+
     }
 
 
@@ -55,23 +56,6 @@ public class TemporalLogStructure implements Iterable <LogEntry> {
     private void cleanUpExpiredWindows(long currentTime) {
         long oldestValidWindow = currentTime - windowDurationMillis;
         temporalWindows.headMap(oldestValidWindow, true).clear();
-    }
-
-
-    /**
-     * Возвращает итерируемую часть записей логов в диапазоне времени.
-     *
-     * @param startTime Время начала диапазона в миллисекундах.
-     * @param endTime   Время окончания диапазона в миллисекундах.
-     * @return Итерируемый объект записей логов {@link LogEntry} в заданном диапазоне времени.
-     */
-    public Iterable <LogEntry> range(long startTime, long endTime) {
-        List <LogEntry> result = new ArrayList<>();
-        SortedMap<Long, List  <LogEntry>> subMap = temporalWindows.subMap(startTime, true, endTime, true);
-        for (List  <LogEntry> window : subMap.values()) {
-            result.addAll(window);
-        }
-        return result;
     }
 
 

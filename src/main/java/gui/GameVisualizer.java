@@ -11,8 +11,8 @@ import java.awt.geom.AffineTransform;
  */
 public class GameVisualizer extends JPanel implements RobotModelListener {
 
-    private final RobotModel robotModel; // Модель робота
-    private Point clickPoint; // Координаты точки, в которую произведен клик мышью
+    private final RobotModel robotModel;
+    private Point clickPoint;
 
     /**
      * Конструктор класса GameVisualizer.
@@ -30,11 +30,11 @@ public class GameVisualizer extends JPanel implements RobotModelListener {
                 clickPoint = e.getPoint();
                 int x = clickPoint.x;
                 int y = clickPoint.y;
-                robotModel.moveRobotTo(x, y); // Перемещаем робота в точку клика мышью
+                robotModel.moveRobotTo(x, y);
             }
         });
 
-        robotModel.addListener(this);  // Добавляем себя в качестве слушателя изменений позиции робота
+        robotModel.addListener(this);
     }
 
     /**
@@ -47,13 +47,11 @@ public class GameVisualizer extends JPanel implements RobotModelListener {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
 
-        // Отрисовываем точку, в которую был произведен клик
         if (clickPoint != null) {
             g2d.setColor(Color.BLACK);
             g2d.fillOval(clickPoint.x - 5, clickPoint.y - 5, 10, 10);
         }
 
-        // Отрисовываем робот
         Point robotPosition = robotModel.getRobotPosition();
         int robotCenterX = (int) robotPosition.getX();
         int robotCenterY = (int) robotPosition.getY();

@@ -1,5 +1,6 @@
 package gui;
 
+import log.LogWindowSource;
 import log.Logger;
 
 import javax.swing.*;
@@ -60,7 +61,6 @@ public class MainApplicationFrame extends JFrame implements Stateful {
 
         logWindow = createLogWindow();
         addWindow(logWindow);
-
 
         RobotModel robotModel = new RobotModel();
 

@@ -1,5 +1,7 @@
 package gui;
 
+import log.Logger;
+
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,17 +14,17 @@ public class RobotModel {
     /**
      * Текущая координата X робота.
      */
-    protected double robotPositionX = 100;
+    private double robotPositionX = 100;
 
     /**
      * Текущая координата Y робота.
      */
-    protected double robotPositionY = 100;
+    private double robotPositionY = 100;
 
     /**
      * Текущее направление робота (в радианах).
      */
-    protected double robotDirection = 0;
+    private double robotDirection = 0;
 
     /**
      * Угол для вращения робота.
@@ -59,6 +61,7 @@ public class RobotModel {
      */
     private List<RobotModelListener> listeners = new ArrayList<>();
 
+
     public RobotModel() {
     }
 
@@ -74,6 +77,10 @@ public class RobotModel {
         double angleToTarget = angleTo (robotPositionX,robotPositionY, targetPositionX, targetPositionY );
         rotationAngle(angleToTarget);
         moveRobot();
+
+        // Записываем сообщение в лог о новой позиции робота
+        Logger.debug("1 " + "Robot moved to position: (" + (int) robotPositionX + ", " + (int) robotPositionY + ")");
+
         notifyListeners();
     }
 
