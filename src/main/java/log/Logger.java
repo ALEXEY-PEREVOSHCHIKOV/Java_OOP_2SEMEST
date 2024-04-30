@@ -10,10 +10,7 @@ public final class Logger
     /**
      * Лог-источник по умолчанию.
      */
-    private static final LogWindowSource defaultLogSource ;
-    static {
-        defaultLogSource = new LogWindowSource(3);
-    }
+    private static final LogWindowSource defaultLogSource = new LogWindowSource(4);
 
 
     /**
