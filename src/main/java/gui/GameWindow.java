@@ -59,3 +59,4 @@ public class GameWindow extends JInternalFrame implements Stateful {
         }
     }
 }
+

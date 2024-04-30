@@ -1,5 +1,7 @@
 package log;
 
+import java.lang.ref.WeakReference;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -12,7 +14,7 @@ public class LogWindowSource {
     /**
      * Список слушателей изменений лога.
      */
-    private final List <LogChangeListener> listeners;
+    private final List<WeakReference<LogChangeListener>> listeners = new CopyOnWriteArrayList<>();
 
     /**
      * Темпоральная структура для хранения логов.
@@ -26,7 +28,6 @@ public class LogWindowSource {
      */
     public LogWindowSource(int queueLength) {
         this.temporalLogWindow = new TemporalLogStructure(queueLength);
-        this.listeners = new CopyOnWriteArrayList<>();
     }
 
 
@@ -64,7 +65,7 @@ public class LogWindowSource {
      * @param listener Слушатель, который будет получать уведомления.
      */
     public void registerListener(LogChangeListener listener) {
-        listeners.add(listener);
+        listeners.add(new WeakReference<>(listener));
     }
 
 
@@ -72,8 +73,14 @@ public class LogWindowSource {
      * Уведомляет всех зарегистрированных слушателей об изменении лога.
      */
     private void notifyListeners() {
-        for (LogChangeListener listener : listeners) {
-            listener.onLogChanged();
+        for (Iterator<WeakReference<LogChangeListener>> it = listeners.iterator(); it.hasNext();) {
+            WeakReference<LogChangeListener> ref = it.next();
+            LogChangeListener listener = ref.get();
+            if (listener != null) {
+                listener.onLogChanged();
+            } else {
+                it.remove();
+            }
         }
     }
 }
