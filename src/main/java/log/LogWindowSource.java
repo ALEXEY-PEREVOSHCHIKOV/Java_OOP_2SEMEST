@@ -1,87 +1,139 @@
 package log;
 
 import java.lang.ref.WeakReference;
-import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-
 
 /**
- * Источник логов, который обеспечивает доступ к записям на основе темпоральных окон.
+ * Представляет источник сообщений для окна протокола.
  */
 public class LogWindowSource {
 
     /**
+     * Максимальная длина очереди сообщений в логе.
+     */
+    private final int m_iQueueLength;
+
+    /**
+     * Список сообщений лога.
+     */
+    private final LinkedList<LogEntry> m_messages;
+
+    /**
      * Список слушателей изменений лога.
+     * Используем слабые ссылки, чтобы избежать утечек памяти.
      */
-    private final List<WeakReference<LogChangeListener>> listeners = new CopyOnWriteArrayList<>();
+    private final List<WeakReference<LogChangeListener>> m_listeners;
 
     /**
-     * Темпоральная структура для хранения логов.
+     * Создает новый источник сообщений для окна протокола с указанным размером очереди.
+     *
+     * @param iQueueLength Максимальный размер очереди сообщений.
      */
-    private final TemporalLogStructure temporalLogWindow;
-
-
-    /**
-     * Конструктор источника логов с заданной длиной очереди.
-     * @param queueLength Длина очереди логов.
-     */
-    public LogWindowSource(int queueLength) {
-        this.temporalLogWindow = new TemporalLogStructure(queueLength);
+    public LogWindowSource(int iQueueLength) {
+        m_iQueueLength = iQueueLength;
+        m_messages = new LinkedList<>();
+        m_listeners = new ArrayList<>();
     }
 
-
     /**
-     * Получает все записи лога.
-     * @return Итерируемый объект всех записей лога.
+     * Регистрирует слушателя для получения уведомлений об изменениях в протоколе.
+     *
+     * @param listener Слушатель изменений в протоколе.
      */
-    public Iterable <LogEntry> all() {
-        return temporalLogWindow;
+    public void registerListener(LogChangeListener listener) {
+        synchronized (m_listeners) {
+            m_listeners.add(new WeakReference<>(listener));
+        }
     }
 
-
     /**
-     * Возвращает количество записей в логе.
-     * @return Общее число записей логов.
+     * Удаляет слушателя, чтобы он перестал получать уведомления об изменениях в протоколе.
+     *
+     * @param listener Слушатель изменений в протоколе.
      */
-    public int size() {
-        return temporalLogWindow.size();
+    public void unregisterListener(LogChangeListener listener) {
+        synchronized (m_listeners) {
+            m_listeners.removeIf(weakRef -> weakRef.get() == listener || weakRef.get() == null);
+        }
     }
 
-
     /**
-     * Добавляет новую запись в лог.
-     * @param logLevel Уровень логирования.
-     * @param strMessage Сообщение лога.
+     * Добавляет новую запись в протокол с указанным уровнем и сообщением.
+     *
+     * @param logLevel   Уровень протоколирования.
+     * @param strMessage Сообщение для записи в протокол.
      */
     public void append(LogLevel logLevel, String strMessage) {
-        temporalLogWindow.append(logLevel, strMessage);
+        LogEntry entry = new LogEntry(logLevel, strMessage);
+        synchronized (m_messages) {
+            if (m_messages.size() >= m_iQueueLength) {
+                m_messages.removeFirst(); // Удаляем самое старое сообщение
+            }
+            m_messages.addLast(entry);
+        }
         notifyListeners();
     }
 
-
-    /**
-     * Регистрирует слушателя для получения уведомлений об изменении лога.
-     * @param listener Слушатель, который будет получать уведомления.
-     */
-    public void registerListener(LogChangeListener listener) {
-        listeners.add(new WeakReference<>(listener));
-    }
-
-
     /**
      * Уведомляет всех зарегистрированных слушателей об изменении лога.
+     * Создается копия списка слушателей для безопасной итерации, чтобы избежать
+     * ошибок синхронизации и предотвратить изменение списка во время итерации.
      */
     private void notifyListeners() {
-        for (Iterator<WeakReference<LogChangeListener>> it = listeners.iterator(); it.hasNext();) {
-            WeakReference<LogChangeListener> ref = it.next();
-            LogChangeListener listener = ref.get();
-            if (listener != null) {
-                listener.onLogChanged();
-            } else {
-                it.remove();
+        List<LogChangeListener> activeListeners = new ArrayList<>();
+        synchronized (m_listeners) {
+            for (WeakReference<LogChangeListener> weakRef : m_listeners) {
+                LogChangeListener listener = weakRef.get();
+                if (listener != null) {
+                    activeListeners.add(listener);
+                }
             }
+        }
+        for (LogChangeListener listener : activeListeners) {
+            listener.onLogChanged();
+        }
+    }
+
+    /**
+     * Возвращает текущее количество сообщений в протоколе.
+     *
+     * @return Количество сообщений в протоколе.
+     */
+    public int size() {
+        synchronized (m_messages) {
+            return m_messages.size();
+        }
+    }
+
+    /**
+     * Возвращает итератор, который перечисляет сообщения протокола, начиная с указанного индекса
+     * и не более указанного количества.
+     *
+     * @param startFrom Начальный индекс для перечисления сообщений.
+     * @param count     Максимальное количество сообщений для перечисления.
+     * @return Итератор, перечисляющий сообщения протокола.
+     */
+    public Iterable<LogEntry> range(int startFrom, int count) {
+        synchronized (m_messages) {
+            if (startFrom < 0 || startFrom >= m_messages.size()) {
+                return Collections.emptyList();
+            }
+            int indexTo = Math.min(startFrom + count, m_messages.size());
+            return new ArrayList<>(m_messages.subList(startFrom, indexTo));
+        }
+    }
+
+    /**
+     * Возвращает итератор, который перечисляет все сообщения протокола.
+     *
+     * @return Итератор, перечисляющий все сообщения протокола.
+     */
+    public Iterable<LogEntry> all() {
+        synchronized (m_messages) {
+            return new ArrayList<>(m_messages);
         }
     }
 }
-
