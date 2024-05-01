@@ -21,8 +21,6 @@ public class Main
   public static void main(String[] args) {
     try {
       UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
-      UIManager.put("OptionPane.yesButtonText", "Да");
-      UIManager.put("OptionPane.noButtonText", "Нет");
       // другие внешние виды.
       // UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
       // UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());

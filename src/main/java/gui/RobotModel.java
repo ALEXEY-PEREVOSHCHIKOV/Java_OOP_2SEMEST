@@ -78,9 +78,6 @@ public class RobotModel {
         rotationAngle(angleToTarget);
         moveRobot();
 
-        // Записываем сообщение в лог о новой позиции робота
-        Logger.debug("1 " + "Robot moved to position: (" + (int) robotPositionX + ", " + (int) robotPositionY + ")");
-
         notifyListeners();
     }
 

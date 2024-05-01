@@ -39,7 +39,7 @@ public class LogWindow extends JInternalFrame implements LogChangeListener, Stat
      * @param logSource источник протокола работы
      */
     public LogWindow(LogWindowSource logSource) {
-        super("Протокол работы", true, true, true, true);
+        super(LocalizationManager.getString("logWindowTitle"), true, true, true, true);
         this.logSource = logSource;
         this.logSource.registerListener(this);
 

@@ -25,7 +25,7 @@ public class GameWindow extends JInternalFrame implements Stateful {
      * Конструктор для создания нового игрового окна.
      */
     public GameWindow(RobotModel robotModel) {
-        super("Игровое поле", true, true, true, true);
+        super(LocalizationManager.getString("gameWindowTitle"), true, true, true, true);
         this.robotModel = robotModel;
         gameVisualizer = new GameVisualizer(robotModel);
         gameController = new GameController(robotModel,gameVisualizer);

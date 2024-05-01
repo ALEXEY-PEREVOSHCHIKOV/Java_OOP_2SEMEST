@@ -109,24 +109,6 @@ public class LogWindowSource {
     }
 
     /**
-     * Возвращает итератор, который перечисляет сообщения протокола, начиная с указанного индекса
-     * и не более указанного количества.
-     *
-     * @param startFrom Начальный индекс для перечисления сообщений.
-     * @param count     Максимальное количество сообщений для перечисления.
-     * @return Итератор, перечисляющий сообщения протокола.
-     */
-    public Iterable<LogEntry> range(int startFrom, int count) {
-        synchronized (m_messages) {
-            if (startFrom < 0 || startFrom >= m_messages.size()) {
-                return Collections.emptyList();
-            }
-            int indexTo = Math.min(startFrom + count, m_messages.size());
-            return new ArrayList<>(m_messages.subList(startFrom, indexTo));
-        }
-    }
-
-    /**
      * Возвращает итератор, который перечисляет все сообщения протокола.
      *
      * @return Итератор, перечисляющий все сообщения протокола.

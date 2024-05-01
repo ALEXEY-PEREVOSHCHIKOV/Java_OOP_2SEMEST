@@ -31,7 +31,7 @@ public class RobotCoordinatesWindow extends JInternalFrame implements RobotModel
      * @param robotModel Модель робота, для которой будет отображаться информация о координатах
      */
     public RobotCoordinatesWindow(RobotModel robotModel) {
-        super("Robot Window", true, true, true, true);
+        super(LocalizationManager.getString("robotCoordinatesWindowTitle"), true, true, true, true);
         this.robotModel = robotModel;
 
         setSize(300, 200);
@@ -51,7 +51,7 @@ public class RobotCoordinatesWindow extends JInternalFrame implements RobotModel
      */
     private void updateCoordinatesLabel() {
         Point robotPosition = robotModel.getRobotPosition();
-        coordinatesLabel.setText("Robot coordinates: x=" + (int)robotPosition.getX() + ", y=" + (int)robotPosition.getY());
+        coordinatesLabel.setText(LocalizationManager.getString("robotCoordinatesMessage")+": x=" + (int)robotPosition.getX() + ", y=" + (int)robotPosition.getY());
     }
 
 

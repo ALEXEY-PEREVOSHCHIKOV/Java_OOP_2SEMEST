@@ -1,6 +1,5 @@
 package gui;
 
-import log.LogWindowSource;
 import log.Logger;
 
 import javax.swing.*;
@@ -8,6 +7,8 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 /**
  * Главное окно приложения, наследующее JFrame и реализующее интерфейс Stateful.
@@ -34,6 +35,8 @@ public class MainApplicationFrame extends JFrame implements Stateful {
      */
     private final GameWindow gameWindow;
 
+    private final RobotCoordinatesWindow robotCoordinatesWindow;
+
     /**
      * Константа, содержащая идентификатор окна для сохранения состояния протокола работы.
      */
@@ -49,6 +52,16 @@ public class MainApplicationFrame extends JFrame implements Stateful {
      */
     private final String ROBOT_COORDINATES_WINDOW_ID = "RobotCoordinatesWindow";
 
+
+    // Поле для пункта меню "Выход"
+    private JMenuItem exitMenuItem;
+    private JMenu languageMenu;
+    private JMenu lookAndFeelMenu;
+    private JMenu fileMenu;
+    private JMenuItem crossplatformLookAndFeel;
+    private JMenu testMenu;
+    private JMenuItem systemLookAndFeel;
+    private JMenuItem addLogMessageItem;
 
     /**
      * Конструктор MainApplicationFrame
@@ -70,8 +83,21 @@ public class MainApplicationFrame extends JFrame implements Stateful {
         addWindow(gameWindow);
 
 
-        RobotCoordinatesWindow robotCoordinatesWindow = createRobotLocationWindow(robotModel);
+        robotCoordinatesWindow = createRobotLocationWindow(robotModel);
         addWindow(robotCoordinatesWindow);
+
+
+
+        addLogMessageItem = new JMenuItem("Сообщение в лог", KeyEvent.VK_S);
+        testMenu = new JMenu("Тесты");
+        fileMenu = new JMenu("Настройки");
+        lookAndFeelMenu = new JMenu("Режим отображения");
+        languageMenu = new JMenu("Язык");
+        exitMenuItem = new JMenuItem("Выход"); // Инициализация поля exitMenuItem
+        crossplatformLookAndFeel = new JMenuItem("Универсальная схема", KeyEvent.VK_S);
+        systemLookAndFeel = new JMenuItem("Системная схема", KeyEvent.VK_S);
+
+
 
         setJMenuBar(generateMenuBar());
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -92,7 +118,7 @@ public class MainApplicationFrame extends JFrame implements Stateful {
         logWindow.setSize(300, 800);
         setMinimumSize(logWindow.getSize());
         logWindow.pack();
-        Logger.debug("Протокол работает");
+        Logger.debug(LocalizationManager.getString("debugStartMessage"));
         return logWindow;
     }
 
@@ -124,6 +150,7 @@ public class MainApplicationFrame extends JFrame implements Stateful {
         addLookAndFeelMenu(menuBar);
         addTestMenu(menuBar);
         addSettingsMenu(menuBar);
+        addLanguageMenu(menuBar);
         return menuBar;
     }
 
@@ -133,7 +160,6 @@ public class MainApplicationFrame extends JFrame implements Stateful {
      * @param menuBar Меню приложения.
      */
     private void addLookAndFeelMenu(JMenuBar menuBar) {
-        JMenu lookAndFeelMenu = new JMenu("Режим отображения");
         lookAndFeelMenu.setMnemonic(KeyEvent.VK_V);
         lookAndFeelMenu.getAccessibleContext().setAccessibleDescription("Управление режимом отображения приложения");
         addSystemLookAndFeelMenuItem(lookAndFeelMenu);
@@ -148,7 +174,6 @@ public class MainApplicationFrame extends JFrame implements Stateful {
      * @param lookAndFeelMenu Меню отображения.
      */
     private void addSystemLookAndFeelMenuItem(JMenu lookAndFeelMenu) {
-        JMenuItem systemLookAndFeel = new JMenuItem("Системная схема", KeyEvent.VK_S);
         systemLookAndFeel.addActionListener((event) -> {
             setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             this.invalidate();
@@ -163,7 +188,6 @@ public class MainApplicationFrame extends JFrame implements Stateful {
      * @param lookAndFeelMenu Меню отображения.
      */
     private void addCrossPlatformLookAndFeelMenuItem(JMenu lookAndFeelMenu) {
-        JMenuItem crossplatformLookAndFeel = new JMenuItem("Универсальная схема", KeyEvent.VK_S);
         crossplatformLookAndFeel.addActionListener((event) -> {
             setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
             this.invalidate();
@@ -177,9 +201,7 @@ public class MainApplicationFrame extends JFrame implements Stateful {
      * @param menuBar Меню приложения.
      */
     private void addTestMenu(JMenuBar menuBar) {
-        JMenu testMenu = new JMenu("Тесты");
         testMenu.setMnemonic(KeyEvent.VK_T);
-        testMenu.getAccessibleContext().setAccessibleDescription("Тестовые команды");
         addLogMessageMenuItem(testMenu);
         menuBar.add(testMenu);
     }
@@ -190,9 +212,8 @@ public class MainApplicationFrame extends JFrame implements Stateful {
      * @param testMenu Меню "Тесты".
      */
     private void addLogMessageMenuItem(JMenu testMenu) {
-        JMenuItem addLogMessageItem = new JMenuItem("Сообщение в лог", KeyEvent.VK_S);
         addLogMessageItem.addActionListener((event) -> {
-            Logger.debug("Новая строка");
+            Logger.debug(LocalizationManager.getString("debugMessage"));
         });
         testMenu.add(addLogMessageItem);
     }
@@ -217,27 +238,57 @@ public class MainApplicationFrame extends JFrame implements Stateful {
      * @param menuBar Меню приложения.
      */
     private void addSettingsMenu(JMenuBar menuBar) {
-        JMenu fileMenu = new JMenu("Настройки");
-        fileMenu.setMnemonic(KeyEvent.VK_F);
-
-        JMenuItem exitMenuItem = new JMenuItem("Выход");
         exitMenuItem.setMnemonic(KeyEvent.VK_X);
         exitMenuItem.addActionListener((event) -> {
             WindowEvent closeEvent = new WindowEvent(this, WindowEvent.WINDOW_CLOSING);
             Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(closeEvent);
         });
+        fileMenu.setMnemonic(KeyEvent.VK_F);
         fileMenu.add(exitMenuItem);
-
         menuBar.add(fileMenu);
     }
 
+    private void addLanguageMenu(JMenuBar menuBar) {
 
+        JMenuItem russianMenuItem = new JMenuItem("Русский");
+        russianMenuItem.addActionListener(e -> {
+            LocalizationManager.setLocale(new Locale("ru"));
+            updateLocalizedText();
+        });
+
+        JMenuItem translitMenuItem = new JMenuItem("Translit");
+        translitMenuItem.addActionListener(e -> {
+            LocalizationManager.setLocale(new Locale("en")); // Латиница
+            updateLocalizedText();
+        });
+
+        languageMenu.add(russianMenuItem);
+        languageMenu.add(translitMenuItem);
+        menuBar.add(languageMenu);
+    }
+
+    private void updateLocalizedText() {
+        exitMenuItem.setText(LocalizationManager.getString("exitMenuItemText"));
+        languageMenu.setText(LocalizationManager.getString("languageMenuText"));
+        lookAndFeelMenu.setText(LocalizationManager.getString("lookAndFeelMenuText"));
+        fileMenu.setText(LocalizationManager.getString("fileMenuText"));
+        crossplatformLookAndFeel.setText(LocalizationManager.getString("crossplatformLookAndFeelText"));
+        testMenu.setText(LocalizationManager.getString("testMenuText"));
+        systemLookAndFeel.setText(LocalizationManager.getString("systemLookAndFeelText"));
+        addLogMessageItem.setText(LocalizationManager.getString("addLogMessageItem"));
+        UIManager.put("OptionPane.yesButtonText", LocalizationManager.getString("yesButtonText"));
+        UIManager.put("OptionPane.noButtonText", LocalizationManager.getString("noButtonText"));
+        logWindow.setTitle(LocalizationManager.getString("logWindowTitle"));
+        gameWindow.setTitle(LocalizationManager.getString("gameWindowTitle"));
+        robotCoordinatesWindow.setTitle(LocalizationManager.getString("robotCoordinatesWindowTitle"));
+    }
+
+    
     /**
      * Завершает работу приложения после подтверждения выхода.
      */
     private void exitApplication() {
-        int confirmed = JOptionPane.showConfirmDialog(this,
-                "Вы действительно хотите выйти из приложения?", "Подтверждение выхода",
+       int confirmed = JOptionPane.showConfirmDialog(this, LocalizationManager.getString("confirmExitMessage"), LocalizationManager.getString("confirmExitTitle"),
                 JOptionPane.YES_NO_OPTION);
 
         if (confirmed == JOptionPane.YES_OPTION) {
