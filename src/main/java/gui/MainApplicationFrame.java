@@ -7,6 +7,8 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.lang.reflect.Field;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -53,15 +55,46 @@ public class MainApplicationFrame extends JFrame implements Stateful {
     private final String ROBOT_COORDINATES_WINDOW_ID = "RobotCoordinatesWindow";
 
 
-    // Поле для пункта меню "Выход"
+    /**
+     * пункт меню "Выход"
+     */
     private JMenuItem exitMenuItem;
+
+    /**
+     * пункт меню "Язык"
+     */
     private JMenu languageMenu;
+
+    /**
+     * пункт меню "Режим отображения"
+     */
     private JMenu lookAndFeelMenu;
+
+    /**
+     * пункт меню "Настройки"
+     */
     private JMenu fileMenu;
+
+    /**
+     * Пункт подменю режим отображения "Универсальная схема"
+     */
     private JMenuItem crossplatformLookAndFeel;
+
+    /**
+     * пункт меню "Тесты"
+     */
     private JMenu testMenu;
+
+    /**
+     * пункт подменю режим отображения "Системная схема"
+     */
     private JMenuItem systemLookAndFeel;
+
+    /**
+     * пункт подменю настроек "Сообщение в лог"
+     */
     private JMenuItem addLogMessageItem;
+
 
     /**
      * Конструктор MainApplicationFrame
@@ -87,7 +120,6 @@ public class MainApplicationFrame extends JFrame implements Stateful {
         addWindow(robotCoordinatesWindow);
 
 
-
         addLogMessageItem = new JMenuItem("Сообщение в лог", KeyEvent.VK_S);
         testMenu = new JMenu("Тесты");
         fileMenu = new JMenu("Настройки");
@@ -98,13 +130,12 @@ public class MainApplicationFrame extends JFrame implements Stateful {
         systemLookAndFeel = new JMenuItem("Системная схема", KeyEvent.VK_S);
 
 
-
         setJMenuBar(generateMenuBar());
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
         addWindowListener(new ConfirmExitWindowListener());
 
-        restoreState(); // загрузка состояния окон
+        restoreState();
     }
 
     /**
@@ -123,6 +154,12 @@ public class MainApplicationFrame extends JFrame implements Stateful {
     }
 
 
+    /**
+     * Создает окно с координатами робота.
+     *
+     * @param robotModel Модель робота, для которой создается окно с координатами.
+     * @return Созданное окно с координатами робота.
+     */
     private RobotCoordinatesWindow createRobotLocationWindow(RobotModel robotModel) {
         RobotCoordinatesWindow robotLocationWindow = new RobotCoordinatesWindow(robotModel);
         robotLocationWindow.setLocation(800, 0);
@@ -267,6 +304,12 @@ public class MainApplicationFrame extends JFrame implements Stateful {
         menuBar.add(languageMenu);
     }
 
+
+    /**
+     * Обновляет локализованный текст для элементов интерфейса приложения.
+     * Использует ресурсы из класса LocalizationManager для получения локализованных строк
+     * и устанавливает их для соответствующих элементов интерфейса.
+     */
     private void updateLocalizedText() {
         exitMenuItem.setText(LocalizationManager.getString("exitMenuItemText"));
         languageMenu.setText(LocalizationManager.getString("languageMenuText"));

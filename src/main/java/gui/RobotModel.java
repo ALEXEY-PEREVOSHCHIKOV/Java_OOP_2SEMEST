@@ -1,7 +1,5 @@
 package gui;
 
-import log.Logger;
-
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +7,7 @@ import java.util.List;
 /**
  * Класс моделирует поведение движения робота в двухмерном пространстве.
  */
-public class RobotModel {
+public class RobotModel implements IRobotModel {
 
     /**
      * Текущая координата X робота.
@@ -171,6 +169,7 @@ public class RobotModel {
      * @param x Целевая координата X.
      * @param y Целевая координата Y.
      */
+    @Override
     public void moveRobotTo(int x, int y) {
         setTargetPosition(new Point(x, y));
     }
@@ -180,6 +179,7 @@ public class RobotModel {
      * Добавляет слушателя изменений модели робота.
      * @param listener Слушатель для добавления.
      */
+    @Override
     public void addListener(RobotModelListener listener) {
         listeners.add(listener);
     }
@@ -188,7 +188,8 @@ public class RobotModel {
     /**
      * Уведомляет слушателя изменений модели робота.
      */
-    private void notifyListeners() {
+    @Override
+    public void notifyListeners() {
         for (RobotModelListener listener : listeners) {
             listener.onRobotPositionChanged(robotPositionX, robotPositionY, robotDirection);
         }
