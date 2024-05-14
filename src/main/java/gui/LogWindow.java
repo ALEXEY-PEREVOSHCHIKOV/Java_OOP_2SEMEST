@@ -6,13 +6,14 @@ import log.LogWindowSource;
 import log.Logger;
 
 import java.awt.*;
+import java.util.Locale;
 import javax.swing.*;
 
 
 /**
  * Класс LogWindow представляет окно с протоколом работы приложения.
  */
-public class LogWindow extends JInternalFrame implements LogChangeListener, Stateful {
+public class LogWindow extends JInternalFrame implements LogChangeListener, Stateful, LocalizationInterface {
 
 
     /**
@@ -103,5 +104,11 @@ public class LogWindow extends JInternalFrame implements LogChangeListener, Stat
                 e.printStackTrace();
             }
         }
+    }
+
+
+    @Override
+    public void changelocale(Locale locale){
+        setTitle(LocalizationManager.getString("logWindowTitle"));
     }
 }

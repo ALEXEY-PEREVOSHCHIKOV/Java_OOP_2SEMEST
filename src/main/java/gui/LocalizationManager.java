@@ -14,6 +14,11 @@ public class LocalizationManager {
      */
     private static ResourceBundle resources = ResourceBundle.getBundle("messages", Locale.getDefault());
 
+
+    /**
+     * Cеттер для установки текущей локали
+     * @param locale
+     */
     public static void setLocale(Locale locale){
         resources = ResourceBundle.getBundle("messages", locale);
     }

@@ -295,7 +295,7 @@ public class MainApplicationFrame extends JFrame implements Stateful, Localizati
         JMenuItem translitMenuItem = new JMenuItem("Translit");
         translitMenuItem.addActionListener(e -> {
             LocalizationManager.setLocale (new Locale("en"));
-            LocalizationManager.updateFrames(new Locale("en"), this); // Латиница
+            LocalizationManager.updateFrames(new Locale("en"), this);
         });
 
         languageMenu.add(russianMenuItem);
