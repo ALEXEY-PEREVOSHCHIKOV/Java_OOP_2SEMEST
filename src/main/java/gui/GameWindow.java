@@ -1,13 +1,14 @@
 package gui;
 
-import javax.swing.JInternalFrame;
-import javax.swing.JPanel;
+import javax.swing.*;
 import java.awt.BorderLayout;
+import java.io.File;
+import java.util.Locale;
 
 /**
  * Внутреннее окно для отображения игрового поля.
  */
-public class GameWindow extends JInternalFrame implements Stateful {
+public class GameWindow extends JInternalFrame implements Stateful, LocalizationInterface {
 
     /**
      * Идентификатор окна для сохранения состояния
@@ -21,6 +22,9 @@ public class GameWindow extends JInternalFrame implements Stateful {
     private final GameController gameController;
     private final RobotModel robotModel;
 
+    private final DefaultListModel<RobotModel> robotsList; // Добавляем список роботов
+
+
     /**
      * Конструктор для создания нового игрового окна.
      */
@@ -33,6 +37,7 @@ public class GameWindow extends JInternalFrame implements Stateful {
         panel.add(gameVisualizer, BorderLayout.CENTER);
         getContentPane().add(panel);
         pack();
+        robotsList = new DefaultListModel<>(); // Инициализируем список роботов
     }
 
     /**
@@ -57,6 +62,12 @@ public class GameWindow extends JInternalFrame implements Stateful {
                 e.printStackTrace();
             }
         }
+    }
+
+
+    @Override
+    public void changelocale(Locale locale){
+        setTitle(LocalizationManager.getString("gameWindowTitle"));
     }
 }
 

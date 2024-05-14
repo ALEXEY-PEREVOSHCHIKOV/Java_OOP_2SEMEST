@@ -7,15 +7,12 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.File;
-import java.lang.reflect.Field;
 import java.util.Locale;
-import java.util.ResourceBundle;
 
 /**
  * Главное окно приложения, наследующее JFrame и реализующее интерфейс Stateful.
  */
-public class MainApplicationFrame extends JFrame implements Stateful {
+public class MainApplicationFrame extends JFrame implements Stateful, LocalizationInterface {
 
     /**
      * Рабочая область для внутренних окон
@@ -120,6 +117,7 @@ public class MainApplicationFrame extends JFrame implements Stateful {
         addWindow(robotCoordinatesWindow);
 
 
+
         addLogMessageItem = new JMenuItem("Сообщение в лог", KeyEvent.VK_S);
         testMenu = new JMenu("Тесты");
         fileMenu = new JMenu("Настройки");
@@ -128,6 +126,7 @@ public class MainApplicationFrame extends JFrame implements Stateful {
         exitMenuItem = new JMenuItem("Выход"); // Инициализация поля exitMenuItem
         crossplatformLookAndFeel = new JMenuItem("Универсальная схема", KeyEvent.VK_S);
         systemLookAndFeel = new JMenuItem("Системная схема", KeyEvent.VK_S);
+
 
 
         setJMenuBar(generateMenuBar());
@@ -289,14 +288,14 @@ public class MainApplicationFrame extends JFrame implements Stateful {
 
         JMenuItem russianMenuItem = new JMenuItem("Русский");
         russianMenuItem.addActionListener(e -> {
-            LocalizationManager.setLocale(new Locale("ru"));
-            updateLocalizedText();
+            LocalizationManager.setLocale (new Locale("ru"));
+            LocalizationManager.updateFrames(new Locale("ru"), this);
         });
 
         JMenuItem translitMenuItem = new JMenuItem("Translit");
         translitMenuItem.addActionListener(e -> {
-            LocalizationManager.setLocale(new Locale("en")); // Латиница
-            updateLocalizedText();
+            LocalizationManager.setLocale (new Locale("en"));
+            LocalizationManager.updateFrames(new Locale("en"), this); // Латиница
         });
 
         languageMenu.add(russianMenuItem);
@@ -310,7 +309,8 @@ public class MainApplicationFrame extends JFrame implements Stateful {
      * Использует ресурсы из класса LocalizationManager для получения локализованных строк
      * и устанавливает их для соответствующих элементов интерфейса.
      */
-    private void updateLocalizedText() {
+    @Override
+    public void changelocale(Locale locale){
         exitMenuItem.setText(LocalizationManager.getString("exitMenuItemText"));
         languageMenu.setText(LocalizationManager.getString("languageMenuText"));
         lookAndFeelMenu.setText(LocalizationManager.getString("lookAndFeelMenuText"));
@@ -321,9 +321,6 @@ public class MainApplicationFrame extends JFrame implements Stateful {
         addLogMessageItem.setText(LocalizationManager.getString("addLogMessageItem"));
         UIManager.put("OptionPane.yesButtonText", LocalizationManager.getString("yesButtonText"));
         UIManager.put("OptionPane.noButtonText", LocalizationManager.getString("noButtonText"));
-        logWindow.setTitle(LocalizationManager.getString("logWindowTitle"));
-        gameWindow.setTitle(LocalizationManager.getString("gameWindowTitle"));
-        robotCoordinatesWindow.setTitle(LocalizationManager.getString("robotCoordinatesWindowTitle"));
     }
 
     
@@ -402,5 +399,6 @@ public class MainApplicationFrame extends JFrame implements Stateful {
             }
         }
     }
+
 }
 

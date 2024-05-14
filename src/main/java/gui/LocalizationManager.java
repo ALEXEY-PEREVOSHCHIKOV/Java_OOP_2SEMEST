@@ -1,5 +1,6 @@
 package gui;
 
+import java.awt.*;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -13,14 +14,27 @@ public class LocalizationManager {
      */
     private static ResourceBundle resources = ResourceBundle.getBundle("messages", Locale.getDefault());
 
+    public static void setLocale(Locale locale){
+        resources = ResourceBundle.getBundle("messages", locale);
+    }
+
+
+
 
     /**
      * Устанавливает локаль для приложения.
      *
      * @param locale новая локаль.
      */
-    public static void setLocale(Locale locale) {
-        resources = ResourceBundle.getBundle("messages", locale);
+    public static void updateFrames(Locale locale, Component component) {
+        if (component instanceof LocalizationInterface localizationInterface) {
+            localizationInterface.changelocale(locale);
+        }
+        if (component instanceof Container container) {
+            for(Component iComponent : container.getComponents()) {
+                updateFrames(locale, iComponent);
+            }
+        }
     }
 
     /**

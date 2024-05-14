@@ -2,11 +2,12 @@ package gui;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Locale;
 
 /**
  * Внутреннее окно для отображения координат робота.
  */
-public class RobotCoordinatesWindow extends JInternalFrame implements RobotModelListener,Stateful {
+public class RobotCoordinatesWindow extends JInternalFrame implements RobotModelListener,Stateful,LocalizationInterface {
 
     /**
      * Идентификатор окна для сохранения состояния
@@ -90,5 +91,11 @@ public class RobotCoordinatesWindow extends JInternalFrame implements RobotModel
                 e.printStackTrace();
             }
         }
+    }
+
+
+    @Override
+    public void changelocale(Locale locale){
+        setTitle(LocalizationManager.getString("robotCoordinatesWindowTitle"));
     }
 }
