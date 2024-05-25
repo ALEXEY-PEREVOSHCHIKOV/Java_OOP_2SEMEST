@@ -7,6 +7,8 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.lang.reflect.Field;
 import java.util.Locale;
 
 /**
@@ -91,6 +93,7 @@ public class MainApplicationFrame extends JFrame implements Stateful, Localizati
      * пункт подменю настроек "Сообщение в лог"
      */
     private JMenuItem addLogMessageItem;
+    private JMenuItem loadRobotMenuItem;
 
 
     /**
@@ -126,6 +129,18 @@ public class MainApplicationFrame extends JFrame implements Stateful, Localizati
         exitMenuItem = new JMenuItem("Выход"); // Инициализация поля exitMenuItem
         crossplatformLookAndFeel = new JMenuItem("Универсальная схема", KeyEvent.VK_S);
         systemLookAndFeel = new JMenuItem("Системная схема", KeyEvent.VK_S);
+
+
+        loadRobotMenuItem = new JMenuItem("Загрузить нового робота");
+        loadRobotMenuItem.addActionListener((event) -> {
+            JFileChooser fileChooser = new JFileChooser();
+            int result = fileChooser.showOpenDialog(this);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = fileChooser.getSelectedFile();
+                loadNewRobot(selectedFile, "RobotModel"); // Замените на имя класса вашего робота
+            }
+        });
+        fileMenu.add(loadRobotMenuItem);
 
 
 
@@ -397,6 +412,22 @@ public class MainApplicationFrame extends JFrame implements Stateful, Localizati
                     }
                 }
             }
+        }
+    }
+
+
+    public void loadNewRobot(File jarFile, String className) {
+        try {
+        IRobotModel newRobotModel = RobotLoader.loadRobotFromJar(jarFile, className);
+        // Получаем ссылку на текущий экземпляр класса RobotModel
+        Field field = MainApplicationFrame.class.getDeclaredField("RobotModel");
+        field.setAccessible(true);
+        IRobotModel currentRobotModel = (IRobotModel) field.get(this);
+        // Заменяем текущий экземпляр на новый
+        field.set(this, newRobotModel);
+        // Осуществляем необходимую инициализацию и обновление приложения с учетом новой реализации класса робота        // ...
+    } catch (Exception e) {
+        e.printStackTrace();
         }
     }
 

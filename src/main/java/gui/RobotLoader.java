@@ -5,26 +5,24 @@ import java.net.URL;
 import java.net.URLClassLoader;
 
 public class RobotLoader {
+
+    /**
+     * Загружает класс робота из JAR-файла.
+     *
+     * @param jarFile  JAR-файл, содержащий класс робота
+     * @param className Имя класса робота (с пакетом, если он есть)
+     * @return Экземпляр загруженного класса робота
+     * @throws Exception Если произошла ошибка загрузки класса
+     */
     public static IRobotModel loadRobotFromJar(File jarFile, String className) throws Exception {
-        // Проверяем, что файл существует и является .jar файлом
-        if (!jarFile.exists() || !jarFile.isFile() || !jarFile.getName().toLowerCase().endsWith(".jar")) {
-            throw new IllegalArgumentException("Неверный файл .jar");
-        }
-
-        // Создаем URLClassLoader для загрузки классов из .jar файла
         URLClassLoader classLoader = URLClassLoader.newInstance(new URL[]{jarFile.toURI().toURL()});
-
-        // Загружаем класс робота
-        Class<?> robotClass = classLoader.loadClass(className);
-
-        // Создаем экземпляр класса робота
-        Object robotObject = robotClass.newInstance();
-
-        // Приводим объект к интерфейсу Robot
-        if (!(robotObject instanceof IRobotModel)) {
-            throw new IllegalArgumentException("Класс робота должен реализовывать интерфейс Robot");
+        Class<?> robotClass = Class.forName(className, true, classLoader);
+        Object robotInstance = robotClass.getDeclaredConstructor().newInstance();
+        if (robotInstance instanceof IRobotModel) {
+            return (IRobotModel) robotInstance;
+        } else {
+            throw new IllegalArgumentException("Класс робота не реализует интерфейс IRobotModel");
         }
-
-        return (IRobotModel) robotObject;
     }
 }
+

@@ -26,10 +26,12 @@ public class LocalizationManager {
 
 
 
+
     /**
-     * Устанавливает локаль для приложения.
-     *
-     * @param locale новая локаль.
+     * Рекурсивно обновляет локализацию всех компонентов в указанном контейнере и его подконтейнерах.
+     *  Если компонент реализует интерфейс LocalizationInterface, вызывается метод изменения локали.
+     * @param locale новая локаль, которая будет установлена.
+     * @param component корневой компонент, начиная с которого будет производиться обновление локализации.
      */
     public static void updateFrames(Locale locale, Component component) {
         if (component instanceof LocalizationInterface localizationInterface) {
