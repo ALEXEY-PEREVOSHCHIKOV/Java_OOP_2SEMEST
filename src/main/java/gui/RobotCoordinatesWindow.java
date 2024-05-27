@@ -17,13 +17,13 @@ public class RobotCoordinatesWindow extends JInternalFrame implements RobotModel
     /**
      * Модель робота, предоставляющая информацию о его координатах
      */
-    private RobotModel robotModel;
+    private final IRobotModel robotModel;
 
 
     /**
      * Метка для отображения текущих координат робота
      */
-    private JLabel coordinatesLabel;
+    private final JLabel coordinatesLabel;
 
 
     /**
@@ -31,7 +31,7 @@ public class RobotCoordinatesWindow extends JInternalFrame implements RobotModel
      *
      * @param robotModel Модель робота, для которой будет отображаться информация о координатах
      */
-    public RobotCoordinatesWindow(RobotModel robotModel) {
+    public RobotCoordinatesWindow(IRobotModel robotModel) {
         super(LocalizationManager.getString("robotCoordinatesWindowTitle"), true, true, true, true);
         this.robotModel = robotModel;
 
@@ -94,6 +94,11 @@ public class RobotCoordinatesWindow extends JInternalFrame implements RobotModel
     }
 
 
+    /**
+     * Обновляет локализованный текст для заголовка окна с координатами робота.
+     *
+     * @param locale Новая локаль, на которую необходимо переключиться.
+     */
     @Override
     public void changelocale(Locale locale){
         setTitle(LocalizationManager.getString("robotCoordinatesWindowTitle"));

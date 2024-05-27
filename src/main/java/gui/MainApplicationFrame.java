@@ -32,11 +32,14 @@ public class MainApplicationFrame extends JFrame implements Stateful, Localizati
     private final LogWindow logWindow;
 
     /**
-     * экземпляр главного окна приложения.
+     * Основное игровое окно.
      */
-    private final GameWindow gameWindow;
+    private GameWindow gameWindow;
 
-    private final RobotCoordinatesWindow robotCoordinatesWindow;
+    /**
+     * Окно с координатами робота.
+     */
+    private RobotCoordinatesWindow robotCoordinatesWindow;
 
     /**
      * Константа, содержащая идентификатор окна для сохранения состояния протокола работы.
@@ -93,7 +96,16 @@ public class MainApplicationFrame extends JFrame implements Stateful, Localizati
      * пункт подменю настроек "Сообщение в лог"
      */
     private JMenuItem addLogMessageItem;
+
+    /**
+     * Пункт меню для загрузки нового робота.
+     */
     private JMenuItem loadRobotMenuItem;
+
+    /**
+     * Модель текущего робота.
+     */
+    private IRobotModel robotModel;
 
 
     /**
@@ -108,17 +120,14 @@ public class MainApplicationFrame extends JFrame implements Stateful, Localizati
         logWindow = createLogWindow();
         addWindow(logWindow);
 
-        RobotModel robotModel = new RobotModel();
+        this.robotModel = new RobotModel();
 
 
-        gameWindow = new GameWindow(robotModel);
-        gameWindow.setSize(400, 400);
+        gameWindow = createRobotGameWindow(robotModel);
         addWindow(gameWindow);
-
 
         robotCoordinatesWindow = createRobotLocationWindow(robotModel);
         addWindow(robotCoordinatesWindow);
-
 
 
         addLogMessageItem = new JMenuItem("Сообщение в лог", KeyEvent.VK_S);
@@ -137,11 +146,10 @@ public class MainApplicationFrame extends JFrame implements Stateful, Localizati
             int result = fileChooser.showOpenDialog(this);
             if (result == JFileChooser.APPROVE_OPTION) {
                 File selectedFile = fileChooser.getSelectedFile();
-                loadNewRobot(selectedFile, "RobotModel"); // Замените на имя класса вашего робота
+                loadNewRobot(selectedFile, "gui.RobotModel1");
             }
         });
         fileMenu.add(loadRobotMenuItem);
-
 
 
         setJMenuBar(generateMenuBar());
@@ -174,11 +182,24 @@ public class MainApplicationFrame extends JFrame implements Stateful, Localizati
      * @param robotModel Модель робота, для которой создается окно с координатами.
      * @return Созданное окно с координатами робота.
      */
-    private RobotCoordinatesWindow createRobotLocationWindow(RobotModel robotModel) {
+    private RobotCoordinatesWindow createRobotLocationWindow(IRobotModel robotModel) {
         RobotCoordinatesWindow robotLocationWindow = new RobotCoordinatesWindow(robotModel);
         robotLocationWindow.setLocation(800, 0);
         robotLocationWindow.setSize(200, 100);
         return robotLocationWindow;
+    }
+
+
+    /**
+     * Создает новое окно игры для робота с указанной моделью.
+     *
+     * @param robotModel модель робота, для которого создается окно игры.
+     * @return новое окно игры для робота.
+     */
+    private GameWindow createRobotGameWindow(IRobotModel robotModel){
+        GameWindow robotGameWindow = new GameWindow(robotModel);
+        robotGameWindow.setSize(400, 400);
+        return robotGameWindow;
     }
 
     /**
@@ -299,6 +320,12 @@ public class MainApplicationFrame extends JFrame implements Stateful, Localizati
         menuBar.add(fileMenu);
     }
 
+
+    /**
+     * Добавляет меню выбора языка к указанной строке меню приложения.
+     *
+     * @param menuBar строка меню, к которой добавляется меню выбора языка.
+     */
     private void addLanguageMenu(JMenuBar menuBar) {
 
         JMenuItem russianMenuItem = new JMenuItem("Русский");
@@ -416,18 +443,37 @@ public class MainApplicationFrame extends JFrame implements Stateful, Localizati
     }
 
 
+
+    /**
+     * Загружает новую модель робота из указанного JAR-файла и заменяет текущую модель в приложении.
+     *
+     * @param jarFile Файл JAR, содержащий класс новой модели робота.
+     * @param className Полное имя класса новой модели робота, который необходимо загрузить.
+     * @throws Exception Если происходит ошибка при загрузке нового класса или его инициализации.
+     *
+     */
     public void loadNewRobot(File jarFile, String className) {
         try {
-        IRobotModel newRobotModel = RobotLoader.loadRobotFromJar(jarFile, className);
-        // Получаем ссылку на текущий экземпляр класса RobotModel
-        Field field = MainApplicationFrame.class.getDeclaredField("RobotModel");
-        field.setAccessible(true);
-        IRobotModel currentRobotModel = (IRobotModel) field.get(this);
-        // Заменяем текущий экземпляр на новый
-        field.set(this, newRobotModel);
-        // Осуществляем необходимую инициализацию и обновление приложения с учетом новой реализации класса робота        // ...
-    } catch (Exception e) {
-        e.printStackTrace();
+            IRobotModel newRobotModel = RobotLoader.loadRobotFromJar(jarFile, className);
+
+            Field field = MainApplicationFrame.class.getDeclaredField("robotModel");
+            field.setAccessible(true);
+            field.set(this, newRobotModel);
+
+            saveState();
+            desktopPane.remove(gameWindow);
+            desktopPane.remove(robotCoordinatesWindow);
+
+            gameWindow = createRobotGameWindow(newRobotModel);
+            addWindow(gameWindow);
+
+            robotCoordinatesWindow = createRobotLocationWindow(newRobotModel);
+            addWindow(robotCoordinatesWindow);
+
+            restoreState();
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Выбранный файл не имеет класса модели робота", "Ошибка", JOptionPane.ERROR_MESSAGE);
         }
     }
 

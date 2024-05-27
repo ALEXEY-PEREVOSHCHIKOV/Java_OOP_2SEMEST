@@ -58,6 +58,10 @@ public class RobotModel implements IRobotModel {
      * Список слушателей изменения модели робота.
      */
     private List<RobotModelListener> listeners = new ArrayList<>();
+
+    /**
+     * Модель робота, используемая в приложении.
+     */
     private IRobotModel robotModel;
 
     public RobotModel() {

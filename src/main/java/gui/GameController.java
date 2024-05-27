@@ -9,7 +9,7 @@ import java.util.TimerTask;
  * Контроллер для управления роботом в игре.
  */
 public class GameController extends MouseAdapter {
-    private RobotModel robotModel;
+    private IRobotModel robotModel;
     private Timer timer;
 
     /**
@@ -18,7 +18,7 @@ public class GameController extends MouseAdapter {
      * @param robotModel      Модель робота, которую будет управлять контроллер
      * @param gameVisualizer  Визуализатор игры, к которому привязывается слушатель событий мыши
      */
-    public GameController(RobotModel robotModel, GameVisualizer gameVisualizer) {
+    public GameController(IRobotModel robotModel, GameVisualizer gameVisualizer) {
         this.robotModel = robotModel;
         gameVisualizer.addMouseListener(this);
     }

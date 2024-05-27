@@ -11,7 +11,7 @@ import java.awt.geom.AffineTransform;
  */
 public class GameVisualizer extends JPanel implements RobotModelListener {
 
-    private final RobotModel robotModel;
+    private final IRobotModel robotModel;
     private Point clickPoint;
 
     /**
@@ -19,7 +19,7 @@ public class GameVisualizer extends JPanel implements RobotModelListener {
      *
      * @param robotModel Модель робота для отображения и слежения за его движением.
      */
-    public GameVisualizer(RobotModel robotModel) {
+    public GameVisualizer(IRobotModel robotModel) {
         this.robotModel = robotModel;
         setDoubleBuffered(true);
         setFocusable(true);

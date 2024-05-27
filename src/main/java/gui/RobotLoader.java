@@ -1,28 +1,44 @@
 package gui;
 
+import javax.swing.JOptionPane;
 import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
 
+/**
+ * Класс для загрузки моделей робота из JAR-файлов.
+ */
 public class RobotLoader {
 
     /**
-     * Загружает класс робота из JAR-файла.
+     * Загружает модель робота из указанного JAR-файла.
      *
-     * @param jarFile  JAR-файл, содержащий класс робота
-     * @param className Имя класса робота (с пакетом, если он есть)
-     * @return Экземпляр загруженного класса робота
-     * @throws Exception Если произошла ошибка загрузки класса
+     * @param jarFile   Файл JAR, содержащий класс модели робота.
+     * @param className Полное имя класса модели робота, который необходимо загрузить.
+     * @return Экземпляр класса, реализующего интерфейс IRobotModel.
+     * @throws Exception Если происходит ошибка при загрузке класса, создании экземпляра или приведении к интерфейсу IRobotModel.
      */
     public static IRobotModel loadRobotFromJar(File jarFile, String className) throws Exception {
-        URLClassLoader classLoader = URLClassLoader.newInstance(new URL[]{jarFile.toURI().toURL()});
-        Class<?> robotClass = Class.forName(className, true, classLoader);
-        Object robotInstance = robotClass.getDeclaredConstructor().newInstance();
-        if (robotInstance instanceof IRobotModel) {
-            return (IRobotModel) robotInstance;
-        } else {
-            throw new IllegalArgumentException("Класс робота не реализует интерфейс IRobotModel");
+        // Проверяем, что файл существует и является .jar файлом
+        if (!jarFile.getName().toLowerCase().endsWith(".jar")) {
+            //Сообщение об ошибке на экран
+            JOptionPane.showMessageDialog(null, "Выбранный файл не является JAR-файлом", "Ошибка", JOptionPane.ERROR_MESSAGE);
+        }
+
+        // Создаем URLClassLoader для загрузки классов из .jar файла
+        try (URLClassLoader classLoader = URLClassLoader.newInstance(new URL[]{jarFile.toURI().toURL()})) {
+            // Загружаем класс робота
+            Class<?> robotClass = classLoader.loadClass(className);
+
+            // Создаем экземпляр класса робота
+            Object robotObject = robotClass.getDeclaredConstructor().newInstance();
+
+            // Приводим объект к интерфейсу IRobotModel
+            if (!(robotObject instanceof IRobotModel)) {
+                throw new IllegalArgumentException("Класс робота должен реализовывать интерфейс IRobotModel");
+            }
+
+            return (IRobotModel) robotObject;
         }
     }
 }
-

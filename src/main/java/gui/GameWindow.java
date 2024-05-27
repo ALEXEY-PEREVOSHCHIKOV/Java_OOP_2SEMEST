@@ -19,16 +19,27 @@ public class GameWindow extends JInternalFrame implements Stateful, Localization
      * Визуализатор игрового поля, разделённый по mvc
      */
     private final GameVisualizer gameVisualizer;
-    private final GameController gameController;
-    private final RobotModel robotModel;
 
-    private final DefaultListModel<RobotModel> robotsList; // Добавляем список роботов
+    /**
+     * Контроллер для управления игровым процессом.
+     */
+    private final GameController gameController;
+
+    /**
+     * Модель робота, используемая в приложении.
+     */
+    private final IRobotModel robotModel;
+
+    /**
+     * Список моделей роботов.
+     */
+    private final DefaultListModel<IRobotModel> robotsList;
 
 
     /**
      * Конструктор для создания нового игрового окна.
      */
-    public GameWindow(RobotModel robotModel) {
+    public GameWindow(IRobotModel robotModel) {
         super(LocalizationManager.getString("gameWindowTitle"), true, true, true, true);
         this.robotModel = robotModel;
         gameVisualizer = new GameVisualizer(robotModel);
@@ -65,6 +76,11 @@ public class GameWindow extends JInternalFrame implements Stateful, Localization
     }
 
 
+    /**
+     * Обновляет заголовок окна в соответствии с текущей локалью.
+     *
+     * @param locale новая локаль для приложения.
+     */
     @Override
     public void changelocale(Locale locale){
         setTitle(LocalizationManager.getString("gameWindowTitle"));
