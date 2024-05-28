@@ -18,7 +18,7 @@ public class GameWindow extends JInternalFrame implements Stateful, Localization
     /**
      * Визуализатор игрового поля, разделённый по mvc
      */
-    private final GameVisualizer gameVisualizer;
+    private final AGameVisualizer gameVisualizer;
 
     /**
      * Контроллер для управления игровым процессом.
@@ -39,16 +39,16 @@ public class GameWindow extends JInternalFrame implements Stateful, Localization
     /**
      * Конструктор для создания нового игрового окна.
      */
-    public GameWindow(IRobotModel robotModel) {
+    public GameWindow(IRobotModel robotModel, AGameVisualizer gameVisualizer) {
         super(LocalizationManager.getString("gameWindowTitle"), true, true, true, true);
         this.robotModel = robotModel;
-        gameVisualizer = new GameVisualizer(robotModel);
+        this.gameVisualizer=gameVisualizer;
         gameController = new GameController(robotModel,gameVisualizer);
         JPanel panel = new JPanel(new BorderLayout());
         panel.add(gameVisualizer, BorderLayout.CENTER);
         getContentPane().add(panel);
         pack();
-        robotsList = new DefaultListModel<>(); // Инициализируем список роботов
+        robotsList = new DefaultListModel<>();
     }
 
     /**

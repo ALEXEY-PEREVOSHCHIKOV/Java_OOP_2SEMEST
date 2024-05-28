@@ -1,25 +1,51 @@
 package gui;
 
+import javax.swing.*;
 import java.awt.*;
-import java.awt.geom.AffineTransform;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 /**
- * Панель для визуализации робота и обработки событий мыши.
+ * Абстрактный класс для визуализаторов игры с роботом.
  */
-public class GameVisualizer extends AGameVisualizer {
+public abstract class AGameVisualizer extends JPanel implements RobotModelListener {
 
-    private final IRobotModel robotModel;
-    private Point clickPoint;
+    protected IRobotModel robotModel;
+    protected Point clickPoint;
 
     /**
-     * Конструктор класса GameVisualizer.
+     * Конструктор класса AGameVisualizer.
      *
      * @param robotModel Модель робота для отображения и слежения за его движением.
      */
-    public GameVisualizer(IRobotModel robotModel) {
-        super(robotModel);
+    public AGameVisualizer(IRobotModel robotModel) {
         this.robotModel = robotModel;
+        setDoubleBuffered(true);
+        setFocusable(true);
+
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                clickPoint = e.getPoint();
+                handleMouseClick(clickPoint);
+            }
+        });
+
+        robotModel.addListener(this);
     }
+
+
+    /**
+     * Обрабатывает событие клика мыши и перемещает робота в указанное место.
+     *
+     * @param point Точка клика.
+     */
+    protected void handleMouseClick(Point point) {
+        int x = point.x;
+        int y = point.y;
+        robotModel.moveRobotTo(x, y);
+    }
+
 
     /**
      * Перерисовывает компонент с учетом текущего состояния робота и точки клика мышью.
@@ -35,20 +61,6 @@ public class GameVisualizer extends AGameVisualizer {
             g2d.setColor(Color.BLACK);
             g2d.fillOval(clickPoint.x - 5, clickPoint.y - 5, 10, 10);
         }
-
-        Point robotPosition = robotModel.getRobotPosition();
-        int robotCenterX = (int) robotPosition.getX();
-        int robotCenterY = (int) robotPosition.getY();
-        AffineTransform t = AffineTransform.getRotateInstance(robotModel.getRobotDirection(), robotCenterX, robotCenterY);
-        g2d.setTransform(t);
-        g2d.setColor(Color.MAGENTA);
-        fillOval(g2d, robotCenterX, robotCenterY, 30, 10);
-        g2d.setColor(Color.BLACK);
-        drawOval(g2d, robotCenterX, robotCenterY, 30, 10);
-        g2d.setColor(Color.WHITE);
-        fillOval(g2d, robotCenterX + 10, robotCenterY, 5, 5);
-        g2d.setColor(Color.BLACK);
-        drawOval(g2d, robotCenterX + 10, robotCenterY, 5, 5);
     }
 
     /**
@@ -60,9 +72,7 @@ public class GameVisualizer extends AGameVisualizer {
      * @param diam1   Диаметр овала по горизонтали.
      * @param diam2   Диаметр овала по вертикали.
      */
-    protected void fillOval(Graphics2D g, int centerX, int centerY, int diam1, int diam2) {
-        g.fillOval(centerX - diam1 / 2, centerY - diam2 / 2, diam1, diam2);
-    }
+    protected void fillOval(Graphics2D g, int centerX, int centerY, int diam1, int diam2) {}
 
     /**
      * Рисует овал указанным цветом.
@@ -73,9 +83,7 @@ public class GameVisualizer extends AGameVisualizer {
      * @param diam1   Диаметр овала по горизонтали.
      * @param diam2   Диаметр овала по вертикали.
      */
-    protected void drawOval(Graphics2D g, int centerX, int centerY, int diam1, int diam2) {
-        g.drawOval(centerX - diam1 / 2, centerY - diam2 / 2, diam1, diam2);
-    }
+    protected void drawOval(Graphics2D g, int centerX, int centerY, int diam1, int diam2) {}
 
     /**
      * Обновляет координаты робота при изменении их моделью.

@@ -107,6 +107,11 @@ public class MainApplicationFrame extends JFrame implements Stateful, Localizati
      */
     private IRobotModel robotModel;
 
+    /**
+     * Визуализатор игрового поля, разделённый по mvc
+     */
+    private final AGameVisualizer gameVisualizer;
+
 
     /**
      * Конструктор MainApplicationFrame
@@ -121,9 +126,10 @@ public class MainApplicationFrame extends JFrame implements Stateful, Localizati
         addWindow(logWindow);
 
         this.robotModel = new RobotModel();
+        this.gameVisualizer=new GameVisualizer(robotModel);
 
 
-        gameWindow = createRobotGameWindow(robotModel);
+        gameWindow = createRobotGameWindow(robotModel, gameVisualizer);
         addWindow(gameWindow);
 
         robotCoordinatesWindow = createRobotLocationWindow(robotModel);
@@ -146,7 +152,7 @@ public class MainApplicationFrame extends JFrame implements Stateful, Localizati
             int result = fileChooser.showOpenDialog(this);
             if (result == JFileChooser.APPROVE_OPTION) {
                 File selectedFile = fileChooser.getSelectedFile();
-                loadNewRobot(selectedFile, "gui.RobotModel1");
+                loadNewRobot(selectedFile, "gui.RobotModel1", "gui.GameVisualizer1");
             }
         });
         fileMenu.add(loadRobotMenuItem);
@@ -196,8 +202,8 @@ public class MainApplicationFrame extends JFrame implements Stateful, Localizati
      * @param robotModel модель робота, для которого создается окно игры.
      * @return новое окно игры для робота.
      */
-    private GameWindow createRobotGameWindow(IRobotModel robotModel){
-        GameWindow robotGameWindow = new GameWindow(robotModel);
+    private GameWindow createRobotGameWindow(IRobotModel robotModel, AGameVisualizer gameVisualizer){
+        GameWindow robotGameWindow = new GameWindow(robotModel,gameVisualizer);
         robotGameWindow.setSize(400, 400);
         return robotGameWindow;
     }
@@ -448,23 +454,28 @@ public class MainApplicationFrame extends JFrame implements Stateful, Localizati
      * Загружает новую модель робота из указанного JAR-файла и заменяет текущую модель в приложении.
      *
      * @param jarFile Файл JAR, содержащий класс новой модели робота.
-     * @param className Полное имя класса новой модели робота, который необходимо загрузить.
      * @throws Exception Если происходит ошибка при загрузке нового класса или его инициализации.
      *
      */
-    public void loadNewRobot(File jarFile, String className) {
+    public void loadNewRobot(File jarFile, String modelClass, String visualizerClass) {
         try {
-            IRobotModel newRobotModel = RobotLoader.loadRobotFromJar(jarFile, className);
+            IRobotModel newRobotModel = RobotLoader.loadRobotFromJar(jarFile, modelClass);
+            AGameVisualizer newGameVisualizer =  VisualizerLoader.loadVisualizerFromJar(jarFile, visualizerClass, newRobotModel);
 
-            Field field = MainApplicationFrame.class.getDeclaredField("robotModel");
-            field.setAccessible(true);
-            field.set(this, newRobotModel);
+            Field modelField = MainApplicationFrame.class.getDeclaredField("robotModel");
+            modelField.setAccessible(true);
+            modelField.set(this, newRobotModel);
+
+            Field visualizerField = MainApplicationFrame.class.getDeclaredField("gameVisualizer");
+            visualizerField.setAccessible(true);
+            visualizerField.set(this, newGameVisualizer);
 
             saveState();
             desktopPane.remove(gameWindow);
             desktopPane.remove(robotCoordinatesWindow);
 
-            gameWindow = createRobotGameWindow(newRobotModel);
+
+            gameWindow = createRobotGameWindow(newRobotModel, newGameVisualizer);
             addWindow(gameWindow);
 
             robotCoordinatesWindow = createRobotLocationWindow(newRobotModel);
@@ -473,7 +484,8 @@ public class MainApplicationFrame extends JFrame implements Stateful, Localizati
             restoreState();
 
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Выбранный файл не имеет класса модели робота", "Ошибка", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Выбранный файл не имеет класса модели робота или визуализатора", "Ошибка", JOptionPane.ERROR_MESSAGE);
         }
     }
 

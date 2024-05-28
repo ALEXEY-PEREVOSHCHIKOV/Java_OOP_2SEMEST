@@ -18,7 +18,7 @@ public class GameController extends MouseAdapter {
      * @param robotModel      Модель робота, которую будет управлять контроллер
      * @param gameVisualizer  Визуализатор игры, к которому привязывается слушатель событий мыши
      */
-    public GameController(IRobotModel robotModel, GameVisualizer gameVisualizer) {
+    public GameController(IRobotModel robotModel, AGameVisualizer gameVisualizer) {
         this.robotModel = robotModel;
         gameVisualizer.addMouseListener(this);
     }
