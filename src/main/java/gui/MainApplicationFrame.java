@@ -141,12 +141,12 @@ public class MainApplicationFrame extends JFrame implements Stateful, Localizati
         fileMenu = new JMenu("Настройки");
         lookAndFeelMenu = new JMenu("Режим отображения");
         languageMenu = new JMenu("Язык");
-        exitMenuItem = new JMenuItem("Выход"); // Инициализация поля exitMenuItem
+        exitMenuItem = new JMenuItem("Выход");
         crossplatformLookAndFeel = new JMenuItem("Универсальная схема", KeyEvent.VK_S);
         systemLookAndFeel = new JMenuItem("Системная схема", KeyEvent.VK_S);
+        loadRobotMenuItem = new JMenuItem("Загрузить нового робота", KeyEvent.VK_S);
 
 
-        loadRobotMenuItem = new JMenuItem("Загрузить нового робота");
         loadRobotMenuItem.addActionListener((event) -> {
             JFileChooser fileChooser = new JFileChooser();
             int result = fileChooser.showOpenDialog(this);
@@ -367,6 +367,7 @@ public class MainApplicationFrame extends JFrame implements Stateful, Localizati
         testMenu.setText(LocalizationManager.getString("testMenuText"));
         systemLookAndFeel.setText(LocalizationManager.getString("systemLookAndFeelText"));
         addLogMessageItem.setText(LocalizationManager.getString("addLogMessageItem"));
+        loadRobotMenuItem.setText(LocalizationManager.getString("loadRobotMenuItem"));
         UIManager.put("OptionPane.yesButtonText", LocalizationManager.getString("yesButtonText"));
         UIManager.put("OptionPane.noButtonText", LocalizationManager.getString("noButtonText"));
     }
